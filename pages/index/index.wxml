@@ -1,0 +1,53 @@
+<!--index.wxml-->
+<view class="container">
+  <view class="cards card-size__with">
+    <block wx:for="{{cards}}" wx:key="{{index}}">
+      <view 
+      class="card-wrapper card-size {{openIndex == index ? 'is-open' : 'is-closed' }} {{selectedCard == null ? 'normal' : openIndex == index  ? 'open' : 'closed'}}" 
+      style="transform: translateY({{40 + 60 * index}}px);" bindtap="onTapCard" data-item="{{item}}" data-index="{{index}}">
+        <!-- <view wx:if="{{selectedCard == null}}" class="card">
+          <image src="{{item.frontImg}}" mode="aspectFill" class="card-img card-front" />
+        </view> -->
+
+        <view class="card {{isFront ? '' : 'card--flipped'}}">
+          <image src="{{item.frontImg}}" mode="aspectFill" class="card-img card-front" />
+          <image wx:if="{{selectedCard !== null}}" src="{{item.backImg}}" mode="aspectFill" class="card-img card-back" />
+        </view>
+
+        <view wx:if="{{selectedCard && selectedCard.backImg}}" catchtap="onTapFlip" class="flip">
+          <image src="../../images/flip.png" class="flip-icon"></image>
+        </view>
+      </view>
+    </block>
+    <view class="selected" wx:if="{{selectedCard}}">
+      <view class="card-info">
+        <view class="cell card-size__with">
+          <text class="label">卡号</text>
+          <text selectable class="info">{{selectedCard.num}}</text>
+          <view bindtap="onTapCopy" class="accessory">
+            <image class="copy-icon" src="../../images/copy.png"></image>
+          </view>
+        </view>
+
+      </view>
+
+      <!-- <view class="card card-back" wx:if="{{selectedCard.backImg}}">
+        <image src="{{selectedCard.backImg}}" mode="aspectFill" class="card-img" />
+      </view> -->
+    </view>
+  </view>
+
+
+  <view class="fab">
+    <view bindtap="onTapAdd" class="c-btn add-btn" wx:if="{{selectedCard === null}}">
+      <image class="add-icon" src="../../images/add.png"></image>
+    </view>
+  </view>
+
+  <gmenu menu="{{menu}}" wx:if="{{selectedCard != null}}" bind:tapItem="onTapMenuItem" bind:change="onTapMenu" data-id="menu" direction="left" open="{{openGooeyMenu}}" gap="5" class="fab"></gmenu>
+
+
+
+
+
+</view>

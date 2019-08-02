@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "gmenu": "/components/gooeyMenu/gooeyMenu"
+  },
+  "navigationBarTitleText": "卡包"
+}

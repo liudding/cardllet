@@ -1,0 +1,30 @@
+<view class="gooey-container">
+  <view class="menu">
+    <div class="menu-open menu-open__{{direction}} {{open ? 'menu-open__checked' : ''}}"></div>
+    <view  class="menu-open-button" hover-class='menu-open-button__hover' catchtap='onTapMenu'>
+      <view wx:if="{{openButtonType === 'hamburger'}}">
+        <span class="hamburger hamburger-1"></span>
+        <span class="hamburger hamburger-2"></span>
+        <span class="hamburger hamburger-3"></span>
+      </view>
+      <view wx:elif="{{openButtonType === 'icon'}}">
+        <image wx:if="{{openButtonIconImage}}" src="{{openButtonIcon}}" mode="aspectFit" class='menu-open-button__icon '></image>
+        <view wx:else  class='iconfont {{openButtonIcon}} menu-open-button__icon'></view>
+      </view>
+    </view>
+    
+
+    <button wx:for="{{menu}}" wx:key="{{index}}" 
+      catchtap='onTapMenuItem' data-item='{{item}}' data-index='{{index}}' 
+      class="menu-item menu-open__{{direction}}" hover-class='menu-item__hover' 
+      open-type="{{ item.openType }}"
+    style="{{open ? 'transform: translate3d(' + (index + 1) * distance * vector.x + 'px, ' + (index + 1) * distance * vector.y + 'px, 0);' : ''}} "> 
+    <!-- transition-duration: '+ (index*50 + 10) +'ms;  -->
+      <view wx:if="{{item.icon}}" class='iconfont {{item.icon}} menu-item__icon'></view>
+      <image wx:else src="{{item.pic}}" class='menu-item__pic' mode='aspectFit'></image>
+      <text wx:if="{{showItemTitle}}" class='menu-item__title'>{{item.title}}</text>
+    </button>
+
+  </view>
+
+</view>
