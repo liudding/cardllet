@@ -5,6 +5,6 @@
 
 ## Screenshot
 
-![](screenshots/home.jpg)
-![](screenshots/carddetail.jpg)
-![](screenshots/waterprint.jpg)
+![](screenshots/home.png)
+![](screenshots/carddetail.png)
+![](screenshots/waterprint.png)
