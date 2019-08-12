@@ -11,7 +11,7 @@ App({
     wx.setStorageSync(KEY_LAUNCH_TIMES, launchTimes)
 
     if (launchTimes <= 1) {
-      let cards = [
+      let demoCards = [
         {
           uid: 'demo-01',
           frontImg: '/images/idcard.png',
@@ -26,6 +26,9 @@ App({
           num: '0000 0000 0000 0000'
         }
       ]
+
+      let cards = wx.getStorageSync(KEY_CARDS) || demoCards
+      
       wx.setStorageSync(KEY_CARDS, cards)
     }
   },
