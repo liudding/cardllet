@@ -1,0 +1,93 @@
+/* A4 paper: 210mm×297mm */
+
+.canvas {
+  /* width: 640rpx; 
+  height: 404rpx;
+  max-width: 320px;
+  max-height: 202px; */
+  width: 210px;
+  height: 297px;
+  /* background: red; */
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.waterprint {
+  background: white;
+  padding: 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  box-shadow: 0px -1px 5px #0000001f;
+}
+
+.section {
+  display: flex;
+  height: 50px;
+  width: 100%;
+  align-items: center;
+}
+
+.section__title {
+  width: 40px;
+}
+
+.section__input {
+  flex: 1;
+  margin-left: 8px;
+}
+
+.toolbar {
+  position: fixed;
+  width: 90%;
+  height: 49px;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #5af;
+  border-radius: 20px;
+  box-shadow: 0px 1px 5px #0000001f;
+  padding: 0px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: env(safe-area-inset-bottom);
+}
+
+.save-btn,
+.waterprint-btn {
+  background: #5af;
+  color: white;
+}
+
+.color-picker {
+  display: flex;
+}
+
+.color-selector {
+  display: flex;
+  overflow-x: scroll;
+  padding: 4px 0;
+}
+
+.color-selector__color {
+  width: 30px;
+  height: 30px;
+  border-radius: 20px;
+  box-shadow: 1px 1px 5px #0000001f;
+  margin: 0 4px;
+}
+
+.item-split {
+  margin-left: 4px;
+  border-right: 1px solid #e5e5e5ac;
+  height: 20px;
+  width: 1px;
+}
+
+.color-picker__show {
+  width: 30px;
+  height: 30px;
+  background: green;
+}

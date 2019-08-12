@@ -20,7 +20,7 @@
 }
 
 .card {
-  /* 1: 1.58 */
+  /* 1: 1.58   85.6mm * 54mm */
   width: 640rpx; 
   height: 404rpx;
   max-width: 320px;

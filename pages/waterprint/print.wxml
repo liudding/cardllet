@@ -1,0 +1,50 @@
+<view>
+  <view>
+    <canvas class="canvas" canvas-id="{{canvasId}}" style="width: {{canvasWidth}}px; height: {{canvasHeight}}px"></canvas>
+  </view>
+</view>
+
+<view class="toolbar">
+  <button bindtap="onTapShowWaterPrint" class="c-btn waterprint-btn ">设置水印</button>
+   <button bindtap="onTapSave" class="c-btn save-btn">保存</button>
+</view>
+
+<popup show="{{showPopup}}" position="bottom" class="popup" cancelText="关闭" showConfirm="{{false}}">
+  <view class="waterprint">
+    <form bindsubmit="formSubmit">
+    <view class="section section_gap">
+        <view class="section__title">文字</view>
+        <input bindblur="onTextChange" bindconfirm="onTextChange" value="{{waterprint.text}}" name="text" class="section__input"></input>
+      </view>
+
+     <view class="section section_gap">
+        <view class="section__title">字号</view>
+        <slider bindchange="onSizeChange" value="{{waterprint.size}}" min="8" name="size" show-value class="section__input"></slider>
+      </view>
+
+      <view class="section section_gap">
+        <view class="section__title">间隔</view>
+        <slider bindchange="onMarginChange" value="{{waterprint.margin}}" name="margin" show-value class="section__input"></slider>
+      </view>
+      <view class="section section_gap">
+        <view class="section__title">透明</view>
+        <slider bindchange="onOpacityChange" value="{{waterprint.opacity}}" name="opacity" show-value class="section__input"></slider>
+      </view>
+      <view class="section section_gap">
+        <view class="section__title">旋转</view>
+        <slider bindchange="onRotationChange" value="{{waterprint.rotation}}" min="-90" max="90" name="rotation" show-value class="section__input"></slider>
+      </view>
+      <view class="section section_gap">
+        <view class="section__title">颜色</view>
+        <view class="section__input color-picker">
+          <view class="color-selector">
+            <view bindtap="onColorChange" data-item="{{item}}" wx:for="{{colors}}" wx:key="{{index}}" class="color-selector__color" style="background:{{item}}"></view>
+          </view>
+          <!-- <view class="item-split"></view> -->
+          <!-- <view class="color-picker__show"></view> -->
+        </view>
+      </view>
+    </form>
+  </view>
+
+</popup>

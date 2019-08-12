@@ -1,0 +1,11 @@
+<view class="popup popup--{{position}} {{ show ? 'popup--show' : ''}}" catch:touchmove="blockTouch">
+  <view wx:if="{{showMask}}" class="popup__mask" catchtap="_handleMaskClick"></view>
+  <view class="popup__container">
+    <slot></slot>
+    <view class="popup__footer">
+      <button class='popup__button' wx:if="{{showCancel}}" catchtap='_onCancel'>{{cancelText}}</button>
+      <button class='popup__button' wx:if="{{showConfirm}}" catchtap='_onConfirm'>确定</button>
+    </view>
+  </view>
+
+</view>

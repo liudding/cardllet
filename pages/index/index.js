@@ -3,7 +3,7 @@
 const app = getApp()
 
 import {
-  KEY_CARDS
+  KEY_CARDS, KEY_LAUNCH_TIMES
 } from '../../utils/constant.js'
 
 import {
@@ -40,7 +40,7 @@ Page({
     // 当已经选中了一张卡片之后，点击其他卡片，则不相应
     // 由于隐藏其他卡片使用的是 opacity，隐藏掉的卡片仍然会占用空间，也会触发此事件。所有使用这各 trick 来解决
     if (this.data.selectedCard) {
-      if ( this.data.selectedCard.uid !== card.uid) { // 点击了其他卡片
+      if (this.data.selectedCard.uid !== card.uid) { // 点击了其他卡片
         return
       } else { // 再次点击了已经打开的卡片
         this.resetToStack()
@@ -78,6 +78,7 @@ Page({
 
   onLoad: function() {
     let cards = wx.getStorageSync(KEY_CARDS) || []
+
     this.setData({
       cards: cards
     })
@@ -109,17 +110,20 @@ Page({
         })
         return
       }
-      Promise.all([card.frontImg && saveImageToPhotosAlbum(card.frontImg), card.backImg && saveImageToPhotosAlbum(card.backImg)]).then(res => {
-        wx.showToast({
-          title: '已保存到相册',
-          icon: 'none'
-        })
-      }).catch(err => {
-        wx.showToast({
-          title: '保存到相册失败',
-          icon: 'none'
-        })
+
+      wx.showActionSheet({
+        itemList: ['保存到相册', '添加水印'],
+        success(res) {
+          if (res.tapIndex === 0) {
+            that.saveToPhotosAlbum(card)
+          } else {
+            that.gotoWaterPrint(card)
+          }
+        },
+
       })
+
+
     } else if (index === 1) { // 编辑
       this.gotoEdit(card)
     } else if (index === 2) { // 删除
@@ -171,6 +175,35 @@ Page({
     })
   },
 
+  saveToPhotosAlbum(card) {
+    Promise.all([card.frontImg && saveImageToPhotosAlbum(card.frontImg), card.backImg && saveImageToPhotosAlbum(card.backImg)]).then(res => {
+      wx.showToast({
+        title: '已保存到相册',
+        icon: 'none'
+      })
+    }).catch(err => {
+      wx.showToast({
+        title: '保存到相册失败',
+        icon: 'none'
+      })
+    })
+  },
+
+  gotoWaterPrint(card) {
+    const that = this
+    wx.navigateTo({
+      url: '/pages/waterprint/print',
+      events: {
+        // cardChanged: function (data) {
+        //   that.onCardChanged(data)
+        // }
+      },
+      success(res) {
+        res.eventChannel.emit('passParams', card)
+      }
+    })
+  },
+
   gotoEdit(card) {
     const that = this
     wx.navigateTo({
@@ -204,5 +237,10 @@ Page({
     wx.setStorageSync(KEY_CARDS, cards)
 
     return cards
+  },
+
+
+  onShareAppMessage: function() {
+
   }
 })
