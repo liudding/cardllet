@@ -40,7 +40,7 @@
 
   <view class="fab">
     <view bindtap="onTapAdd" class="c-btn add-btn" wx:if="{{selectedCard === null}}">
-      <image class="add-icon" src="../../images/add.png"></image>
+      <image class="btn-icon" src="../../images/add.png"></image>
     </view>
   </view>
 
@@ -48,6 +48,11 @@
 
 
 
+  <view class="fab left">
+    <button open-type="feedback" class="c-btn feedback">
+      <image src="/images/message.png" mode="aspectFill" class="btn-icon"/>
+    </button>
+  </view>
 
 
 </view>

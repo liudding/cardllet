@@ -136,7 +136,7 @@
   border-radius: 20px;
 }
 
-.add-icon {
+.btn-icon {
   width: 40px;
   height: 40px;
 }
@@ -156,4 +156,28 @@
 .flip-icon {
   width: 40px;
   height: 40px;
+}
+
+.fab {
+  width: 40px;
+}
+
+.feedback {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: #e2e2e2;
+
+  opacity: 0.3;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.feedback .btn-icon {
+  width: 20px;
+  height: 20px;
 }
