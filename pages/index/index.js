@@ -3,12 +3,21 @@
 const app = getApp()
 
 import {
-  KEY_CARDS, KEY_LAUNCH_TIMES
+  KEY_CARDS, KEY_LAUNCH_TIMES, KEY_DEMO_CARDS
 } from '../../utils/constant.js'
 
+import { syncCards, formateCard, deleteCard, removeDemoCard } from '../../utils/index.js'
+
 import {
-  saveImageToPhotosAlbum
+  saveImageToPhotosAlbum,
+  removeFileIfExists,
+  getFileList
 } from '../../utils/wxUtils.js'
+
+
+const db = wx.cloud.database()
+const cardsCollection = db.collection('cards')
+
 
 Page({
   data: {
@@ -33,12 +42,66 @@ Page({
     isFront: true
   },
 
+  onLoad: function () {
+    let cards = wx.getStorageSync(KEY_CARDS) || []
+    let demoCards = wx.getStorageSync(KEY_DEMO_CARDS)
+
+    cards = cards.concat(demoCards)
+
+    if (cards.length > 0) {
+      this.updateUI(cards)
+    }
+
+    const that = this
+
+    wx.showLoading({
+      title: '加载中',
+    })
+
+    syncCards({
+      progress: (card, cards, newCached) => {
+        if (newCached) {
+          that.updateUI(cards)
+        }
+      }, 
+      complete:(cards) => {
+        console.log('cards sync completed: ', cards.length)
+
+        if (cards.length > 0) {
+          that.updateUI(cards)
+        }
+        
+        wx.hideLoading()
+      },
+      fail(err) {
+        console.log(err)
+        wx.hideLoading()
+      }
+    })
+  },
+
+  updateUI(cards) {
+
+    let formated = cards.map(item => {
+      return formateCard(item)
+    })
+
+    let selectedCard = this.data.selectedCard ? formateCard(this.data.selectedCard) : null
+
+    this.setData({
+      cards: formated,
+      selectedCard: selectedCard
+    })
+  },
+
+  
+
   onTapCard(event) {
     let index = event.currentTarget.dataset.index
     let card = event.currentTarget.dataset.item
 
-    // 当已经选中了一张卡片之后，点击其他卡片，则不相应
-    // 由于隐藏其他卡片使用的是 opacity，隐藏掉的卡片仍然会占用空间，也会触发此事件。所有使用这各 trick 来解决
+    // 当已经选中了一张卡片之后，点击其他卡片，则不响应
+    // 由于隐藏其他卡片使用的是 opacity，隐藏掉的卡片仍然会占用空间，也会触发此事件。所以使用这各 trick 来解决
     if (this.data.selectedCard) {
       if (this.data.selectedCard.uid !== card.uid) { // 点击了其他卡片
         return
@@ -76,13 +139,7 @@ Page({
 
   },
 
-  onLoad: function() {
-    let cards = wx.getStorageSync(KEY_CARDS) || []
 
-    this.setData({
-      cards: cards
-    })
-  },
 
   onTapFlip() {
     this.setData({
@@ -103,14 +160,6 @@ Page({
     const that = this
 
     if (index === 0) { // 保存图片
-      if (!card.frontImg) {
-        wx.showToast({
-          title: '该卡片无图片',
-          icon: 'none'
-        })
-        return
-      }
-
       wx.showActionSheet({
         itemList: ['保存到相册', '添加水印'],
         success(res) {
@@ -120,11 +169,21 @@ Page({
             that.gotoWaterPrint(card)
           }
         },
-
       })
+      return 
+    } 
 
+     if (index === 1) { // 编辑
+      if (card.isDemo) {
+        wx.showModal({
+          title: '提示',
+          content: '示例卡片不能编辑',
+          showCancel: false
+        })
 
-    } else if (index === 1) { // 编辑
+        return
+      }
+
       this.gotoEdit(card)
     } else if (index === 2) { // 删除
       wx.showModal({
@@ -133,13 +192,11 @@ Page({
         confirmColor: '#FF6C6C',
         confirmText: '移除',
         success(res) {
-          if (res.confirm) {
-            let cards = that.removeCard(card)
-            that.setData({
-              cards: cards
-            })
-            that.resetToStack()
+          if (!res.confirm) {
+            return
           }
+
+          that.removeCard(card)
         }
       })
 
@@ -162,17 +219,16 @@ Page({
     })
   },
 
-  onCardChanged(data) {
-    let index = this.data.cards.findIndex(item => item.uid === data.uid)
-    if (index >= 0) {
-      this.data.cards.splice(index, 1, data)
-    } else {
-      this.data.cards.push(data)
+  onCardChanged(card) {
+    let index = this.data.cards.findIndex(item => item.uid === card.uid)
+    if (index >= 0) { // 编辑
+      this.data.cards.splice(index, 1, card)
+      this.data.selectedCard = card
+    } else { // 新增
+      this.data.cards.push(card)
     }
 
-    this.setData({
-      cards: this.data.cards
-    })
+    this.updateUI(this.data.cards)
   },
 
   saveToPhotosAlbum(card) {
@@ -194,9 +250,6 @@ Page({
     wx.navigateTo({
       url: '/pages/waterprint/print',
       events: {
-        // cardChanged: function (data) {
-        //   that.onCardChanged(data)
-        // }
       },
       success(res) {
         res.eventChannel.emit('passParams', card)
@@ -219,10 +272,18 @@ Page({
     })
   },
 
-  removeCard(card) {
-    let cards = wx.getStorageSync(KEY_CARDS) || []
+  removeCardFromUI(card) {
+    let index = this.data.cards.findIndex(item => item.uid === card.uid)
 
-    let index = cards.findIndex(item => item.uid === card.uid)
+    this.data.cards.splice(index, 1)
+
+    this.updateUI(this.data.cards)
+
+    this.resetToStack()
+  },
+
+  removeCard(card) {
+    let index = this.data.cards.findIndex(item => item.uid === card.uid)
     if (index < 0) {
       wx.showModal({
         title: '移除卡片失败',
@@ -232,13 +293,27 @@ Page({
       return
     }
 
-    cards.splice(index, 1)
 
-    wx.setStorageSync(KEY_CARDS, cards)
+    if (card.isDemo) {
+      removeDemoCard(card)
+      this.removeCardFromUI(card)
+      return
+    } 
 
-    return cards
+    const that = this
+
+    wx.showLoading({
+      title: '删除中',
+    })
+
+    deleteCard(card).then(cards => {
+      console.log('after delete card: ', cards)
+
+      that.removeCardFromUI()
+    }).finally(() => {
+      wx.hideLoading()
+    })
   },
-
 
   onShareAppMessage: function() {
 

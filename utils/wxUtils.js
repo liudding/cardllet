@@ -1,6 +1,5 @@
 
-
-function saveContactToSystem(contact, savePhoto=true) {
+function saveContactToSystem(contact, savePhoto = true) {
   return new Promise((resolve, reject) => {
 
     let wxContact = Object.assign({}, contact)
@@ -33,7 +32,7 @@ function saveContactToSystem(contact, savePhoto=true) {
         })
       }
     } else {
-      
+
       saveToPhone(wxContact).then(res => {
         resolve(res)
       }).catch(err => {
@@ -70,7 +69,7 @@ function gotoTucao() {
   const device = wx.getSystemInfoSync()
 
   wx.getNetworkType({
-    success: function (res) {
+    success: function(res) {
       // wifi/2g/3g/4g/unknown(Android下不常见的网络类型)/none(无网络)
       const networkType = res.networkType
 
@@ -80,7 +79,7 @@ function gotoTucao() {
           id: '',
           customData: {
             clientInfo: [device.pixelRatio, device.fontSizeSetting].join(', '),
-            clientVersion: [device.version, device.SDKVersion,].join(),
+            clientVersion: [device.version, device.SDKVersion, ].join(),
             os: [device.brand, device.model, device.platform].join(),
             netType: networkType,
             // osVersion: device.version,
@@ -109,7 +108,7 @@ function handleAuthorization(scope, action) {
             wx.showModal({
               title: '请先授权',
               content: '点击确定，将打开授权设置页面',
-              success: function (res) {
+              success: function(res) {
                 if (res.confirm) {
                   wx.openSetting()
                 } else if (res.cancel) {
@@ -128,7 +127,7 @@ function handleAuthorization(scope, action) {
       }
     }
   })
-  
+
 }
 
 function saveImageToPhotosAlbum(filePath) {
@@ -147,9 +146,145 @@ function saveImageToPhotosAlbum(filePath) {
   })
 }
 
+function removeFileIfExists(path) {
+  return new Promise((resolve, reject) => {
+    wx.removeSavedFile({
+      filePath: path,
+      success() {
+        resolve()
+      },
+      fail(err) {
+        if (err.errMsg.indexOf('not exist') >= 0) {
+          resolve()
+          return
+        }
+        reject(err)
+      },
+      complete() {
+
+      }
+    })
+  })
+
+}
+
+
+function chooseImage() {
+
+  return new Promise((resolve, reject) => {
+    wx.chooseImage({
+      count: 1,
+      sizeType: 'compressed',
+      success: function(res) {
+
+        let path = res.tempFilePaths[0]
+
+        wx.getImageInfo({
+          src: path,
+          success(res) {
+            let image = {
+              path: path,
+              localPath: path,
+              width: res.width,
+              height: res.height,
+              type: res.type
+            }
+
+            resolve(image)
+          },
+          fail(err) {
+            reject(err)
+          }
+        })
+
+      },
+      fail(err) {
+        reject(err)
+      }
+    })
+  })
+
+
+
+}
+
+function getFileList() {
+  return new Promise((resolve, reject) => {
+    wx.getSavedFileList({
+      success(res) {
+        resolve(res.fileList)
+      }
+    })
+  }) 
+ 
+}
+
+function downloadFile(data) {
+  return new Promise((resolve, reject) => {
+    wx.cloud.downloadFile({
+      fileID: data.fileID || data.url,
+      success(res) {
+        console.log('download file success: ', res)
+        
+        wx.getFileSystemManager().saveFile({
+          tempFilePath: res.tempFilePath,
+          // filePath: data.filePath,
+          success(res) {
+            resolve(res.savedFilePath)
+          },
+          fail(err) {
+            reject(err)
+          }
+        })
+        
+      },
+      fail(err) {
+        reject(err)
+      }
+    })
+  })
+ 
+}
+
+function uploadFile(tempPath, cloudPath) {
+  console.log('uploadFile: ', tempPath, cloudPath)
+  return new Promise((resolve, reject) => {
+    wx.cloud.uploadFile({
+      cloudPath: cloudPath, // 上传至云端的路径
+      filePath: tempPath, // 小程序临时文件路径
+      success: res => {
+        let fileID = res.fileID
+
+        wx.saveFile({
+          tempFilePath: tempPath,
+          success(res) {
+            resolve({
+              savedFilePath: res.savedFilePath,
+              fileID: fileID,
+              cloudPath: fileID
+            })
+          },
+          fail(err) {
+            reject(err)
+          }
+        })
+      },
+      fail(err) {
+        reject(err)
+      }
+    })
+  })
+  
+}
+
 module.exports = {
   saveContactToSystem: saveContactToSystem,
   gotoTucao: gotoTucao,
   handleAuthorization,
-  saveImageToPhotosAlbum
+  saveImageToPhotosAlbum,
+  chooseImage, 
+  getFileList,
+  downloadFile,
+  uploadFile,
+  removeFileIfExists
 }

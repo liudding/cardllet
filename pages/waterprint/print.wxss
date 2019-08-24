@@ -39,9 +39,9 @@
 
 .toolbar {
   position: fixed;
-  width: 90%;
-  height: 49px;
-  bottom: 8px;
+  width: 80%;
+  height: 40px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   background: #5af;
@@ -59,6 +59,8 @@
 .waterprint-btn {
   background: #5af;
   color: white;
+  height: 40px;
+  line-height: 40px;
 }
 
 .color-picker {

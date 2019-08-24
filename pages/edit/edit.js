@@ -1,10 +1,24 @@
 import uniqueid from '../../utils/uid.js'
+import {
+  fileInfos,
+  deepCopy
+} from '../../utils/util.js'
+import {
+  formateCard
+} from '../../utils/index.js'
 
 import {
   KEY_CARDS
 } from '../../utils/constant.js'
 import Youtu from '../../utils/youtu.js'
+import {
+  removeFileIfExists,
+  chooseImage,
+  uploadFile
+} from '../../utils/wxUtils.js'
 
+const db = wx.cloud.database()
+const cardsCollection = db.collection('cards')
 
 Page({
 
@@ -21,18 +35,24 @@ Page({
     const that = this
     const eventChannel = this.getOpenerEventChannel()
     eventChannel.on('passParams', function(data) {
-      that.data.originCard = data || {}
+      that.data.originCard = data || {
+        images: []
+      }
+
       that.setData({
-        card: Object.assign({}, data || {})
+        card: deepCopy(that.data.originCard)
       })
     })
   },
 
-  ocrCard(path) {
-    let base64Image = wx.getFileSystemManager().readFileSync(path,'base64')
-    let youtu = new Youtu()
-    youtu.generalOcr(base64Image)
+  updateUI() {
+    let card = formateCard(this.data.card)
+
+    this.setData({
+      card: card
+    })
   },
+
 
   onTapFlip() {
     this.setData({
@@ -42,22 +62,19 @@ Page({
 
   onTapChooseBack() {
     const that = this
-    this.chooseImage().then(path => {
-      that.data.card.backImg = path
-      that.setData({
-        card: that.data.card
-      })
+    chooseImage().then(image => {
+      that.data.card.images.splice(1, 1, image)
+
+      that.updateUI()
     })
   },
 
   onTapChooseFront() {
     const that = this
-    this.chooseImage().then(path => {
-      that.data.card.frontImg = path
+    chooseImage().then(image => {
+      that.data.card.images.splice(0, 1, image)
 
-      that.setData({
-        card: that.data.card
-      })
+      that.updateUI()
     })
   },
 
@@ -79,7 +96,7 @@ Page({
             content: '删除后可再次添加',
             success(res) {
               if (res.confirm) {
-                that.removeCardFace('front')
+                that.removeCardFace(0)
               }
             }
           })
@@ -106,7 +123,7 @@ Page({
             content: '删除后可再次添加',
             success(res) {
               if (res.confirm) {
-                that.removeCardFace('back')
+                that.removeCardFace(1)
               }
             }
           })
@@ -121,7 +138,12 @@ Page({
 
   onTapSave() {
     let temp = Object.assign({}, this.data.card)
-    if (!temp.frontImg) {
+
+    delete(temp.frontImg)
+    delete(temp.backImg)
+
+
+    if (temp.images.length < 1) {
       wx.showModal({
         title: '缺失卡片图片',
         content: '请添加卡片图片',
@@ -131,113 +153,148 @@ Page({
 
       return
     }
+
+    wx.showLoading({
+      title: '保存中',
+    })
+
     const that = this
     let origin = this.data.originCard
 
-    if (temp.uid) {
-
-    } else {
+    if (!temp.uid) {
       temp.uid = uniqueid()
     }
 
-    Promise.all([
-      this.saveImage(temp.frontImg, origin.frontImg),
-      this.saveImage(temp.backImg, origin.backImg)
-    ]).then(values => {
-      temp.frontImg = values[0]
-      temp.backImg = values[1]
-
-      that.saveToStorage(temp)
-
-      // 保存成功
-      const eventChannel = that.getOpenerEventChannel()
-      eventChannel.emit('cardChanged', temp);
-      wx.navigateBack()
+    // 为每张图片生成一个 uuid
+    temp.images = temp.images.map(item => {
+      if (!item.uid) {
+        item.uid = uniqueid()
+      }
+      return item
     })
-  },
 
-  chooseImage() {
-    return new Promise((resolve, reject) => {
-      wx.chooseImage({
-        count: 1,
-        sizeType: 'compressed',
-        success: function (res) {
-          resolve(res.tempFilePaths[0])
-        },
-        fail(err) {
-          reject(err)
-        }
+    let imagesToUpdate = temp.images.filter((item, index) => {
+
+      let originImage = origin.images.find(o => o.uid === item.uid)
+
+      if (!originImage || (originImage && originImage.path !== item.path)) {
+        return true
+      }
+      return false
+    }).concat([])
+
+    let promises = imagesToUpdate.map((item, index) => {
+      return that.saveImage(item.path)
+    })
+
+    Promise.all(promises).then(values => {
+
+      for (let image of values) {
+        let index = values.indexOf(image)
+
+        let imageToUpdate = imagesToUpdate[index]
+
+        let targetImage = temp.images.find(item => item.uid === imageToUpdate.uid)
+
+        targetImage.path = image.cloudPath
+        targetImage.localPath = image.savedFilePath
+      }
+
+      that.saveCard(temp).then(res => {
+        // 保存成功
+        temp._id = res._id
+
+        that.saveToStorage(temp)
+
+        const eventChannel = that.getOpenerEventChannel()
+        eventChannel.emit('cardChanged', temp);
+        wx.navigateBack()
+
+      }).catch(err => {
+        console.log('ERROR: ', err)
+        wx.showModal({
+          title: '出错了',
+          content: '保存卡片失败',
+          showCancel: false,
+        })
+      }).finally(() => {
+        wx.hideLoading()
+      })
+    }).catch(err => {
+      console.log('ERROR: ', err)
+      wx.hideLoading()
+      wx.showModal({
+        title: '出错了',
+        content: '保存图片失败',
+        showCancel: false,
       })
     })
-    
   },
 
-  removeCardFace(face = 'front') {
+
+  removeCardFace(index) {
     let card = this.data.card
-    let path = null
-    if (face === 'front') {
-      path = card.frontImg
-      card.frontImg = null
-    } else if (face === 'back') {
-      path = card.backImg
-      card.backImg = null
-    }
-    this.removeFileIfExists(path)
-    
-    this.setData({
-      card: card
+
+    let item = card.images.splice(index, 1)
+
+    removeFileIfExists(item.path)
+
+    this.updateUI()
+  },
+
+  deleteOldImage(path, oldLocalPath) {
+    wx.cloud.deleteFile({
+      fileList: path,
+      success: res => {
+        removeFileIfExists(oldLocalPath)
+      },
+      fail: console.error
     })
   },
 
-  removeFileIfExists(path) {
-    return new Promise((resolve, reject) => {
-      wx.removeSavedFile({
-        filePath: path,
-        success() {
-          resolve()
-        },
-        fail(err) {
-          if (err.errMsg.indexOf('not exist') >= 0) {
-            resolve()
-            return
-          }
-          reject(err)
-        },
-        complete() {
-
-        }
-      })
+  deleteOldImages(images) {
+    const that = this
+    images.forEach(item => {
+      that.deleteOldImage(item.path, item.localPath)
     })
-    
   },
 
-  saveImage(tempPath, oldpath) {
+  /**
+   * 保存文件到 cloud 并在本地缓存
+   */
+  saveImage(tempPath) {
     return new Promise((resolve, reject) => {
-      if (tempPath === oldpath) {
-        resolve(oldpath)
-        return
-      }
-
-      if (oldpath) { // 先删除旧文件
-        this.removeFileIfExists(oldpath)
-      }
-
       if (!tempPath) {
-        resolve(null)
+        reject(null)
         return
       }
 
-      wx.saveFile({
-        tempFilePath: tempPath,
-        success(res) {
-          resolve(res.savedFilePath)
-        },
-        fail(err) {
-          reject(err)
-        }
+      let ext = fileInfos(tempPath).ext
+
+      uploadFile(tempPath, uniqueid() + '.' + ext).then(res => {
+        resolve(res)
+      }).catch(err => {
+        reject(err)
       })
     })
   },
+
+  saveCard(card) {
+    let temp = Object.assign({}, card)
+    delete temp._id
+    delete temp._openid
+
+    if (card._id) { // 更新
+      return cardsCollection.doc(card._id).update({
+        data: temp
+      })
+    } else {
+      return cardsCollection.add({
+        data: card
+      })
+    }
+  },
+
 
   saveToStorage(card) {
     let cards = wx.getStorageSync(KEY_CARDS) || []
@@ -250,6 +307,6 @@ Page({
       cards.push(card)
     }
 
-    wx.setStorageSync(KEY_CARDS, cards)
+    wx.setStorage({ key: KEY_CARDS, data: cards })
   },
 })

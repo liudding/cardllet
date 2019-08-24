@@ -2,9 +2,8 @@
 <view class="container">
   <view class="cards card-size__with">
     <block wx:for="{{cards}}" wx:key="{{index}}">
-      <view 
-      class="card-wrapper card-size {{openIndex == index ? 'is-open' : 'is-closed' }} {{selectedCard == null ? 'normal' : openIndex == index  ? 'open' : 'closed'}}" 
-      style="transform: translateY({{40 + 60 * index}}px);" bindtap="onTapCard" data-item="{{item}}" data-index="{{index}}">
+      <view class="card-wrapper card-size {{openIndex == index ? 'is-open' : 'is-closed' }} {{selectedCard == null ? 'normal' : openIndex == index  ? 'open' : 'closed'}}" style="transform: translateY({{40 + 60 * index}}px);" bindtap="onTapCard" data-item="{{item}}"
+        data-index="{{index}}">
         <!-- <view wx:if="{{selectedCard == null}}" class="card">
           <image src="{{item.frontImg}}" mode="aspectFill" class="card-img card-front" />
         </view> -->
@@ -19,6 +18,8 @@
         </view>
       </view>
     </block>
+
+    <!-- 卡片信息区域 -->
     <view class="selected" wx:if="{{selectedCard}}">
       <view class="card-info">
         <view class="cell card-size__with">
@@ -49,9 +50,12 @@
 
 
   <view class="fab left">
-    <button open-type="feedback" class="c-btn feedback">
-      <image src="/images/message.png" mode="aspectFill" class="btn-icon"/>
-    </button>
+    <navigator url="/pages/more/more" hover-class="navigator-hover" class="c-btn feedback">
+      <image src="/images/smile.png" mode="aspectFill" class="btn-icon" />
+    </navigator>
+    <!-- <button open-type="feedback" class="c-btn feedback">
+      <image src="/images/smile.png" mode="aspectFill" class="btn-icon"/>
+    </button> -->
   </view>
 
 

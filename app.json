@@ -2,13 +2,15 @@
   "pages": [
     "pages/index/index",
     "pages/edit/edit",
-    "pages/waterprint/print"
+    "pages/waterprint/print",
+    "pages/more/more"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "WeChat",
+    "navigationBarTitleText": "易卡包",
     "navigationBarTextStyle": "black"
   },
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "navigateToMiniProgramAppIdList": ["wx49ddf9db7be1dec0"]
 }

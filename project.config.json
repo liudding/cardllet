@@ -2,15 +2,15 @@
 	"description": "Project configuration file",
 	"packOptions": {
 		"ignore": [
-      {
-        "type": "file",
-        "value": "qrcode.jpeg"
-      },
-      {
-        "type": "file",
-        "value": "screenshot.png"
-      }
-    ]
+			{
+				"type": "file",
+				"value": "qrcode.jpeg"
+			},
+			{
+				"type": "file",
+				"value": "screenshot.png"
+			}
+		]
 	},
 	"setting": {
 		"urlCheck": false,
