@@ -1,0 +1,74 @@
+
+.apps {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  flex-wrap: wrap;
+  /* justify-content: space-evenly; */
+
+  padding: 16px;
+}
+
+.app {
+  padding: 8px;
+
+  display: flex;
+  align-items: center;
+  /* justify-content: space-evenly; */
+
+  text-align: center;
+}
+
+.app__icon {
+  width: 50px;
+  height: 50px;
+  background: #eeeeee;
+
+  border-radius: 30px;
+
+  border: 1px solid #eeeeee;
+}
+
+.app__name {
+  margin-left: 16px;
+  font-size: 18px;
+  color: #2b2b2b;
+}
+
+
+.support {
+  margin-top: 64px;
+  padding: 16px;
+}
+
+.feedback-wrapper {
+  width: 100px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.feedback {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: #e2e2e2;
+
+  opacity: 0.3;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.feedback .btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.feedback__text {
+  font-size: 10px;
+  color: #b2b2b2;
+}

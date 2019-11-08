@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="card-wrapper">
+    <view class="card {{isFront ? '' : 'card--flipped'}}">
+      <image bindtap="onTapChooseFront" catchlongpress="onLongTapFront" src="{{card.frontImg || '../../images/emptyset_card.png'}}" class="card-img card-front" mode="aspectFill"></image>
+      <image wx:if="{{card.frontImg}}" bindtap="onTapChooseBack" catchlongpress="onLongTapBack" src="{{card.backImg || '../../images/emptyset_card.png'}}" class="card-img card-back" mode="aspectFill"></image>
+    
+      <view wx:if="{{card.frontImg}}" bindtap="onTapFlip" class="flip">
+      <image src="../../images/flip.png" class="flip-icon"></image>
+    </view>
+   
+    </view>
+
+    
+  </view>
+
+
+  <view class="card-info card-size__with">
+    <view class="cell">
+      <text class="label">{{cardNumTitle}}</text>
+      <input bindblur="onCardNumConfrim" class="info" value="{{card.num}}" placeholder="填写卡号" placeholder-style="color:gray;"/>
+      <view class="accessory">
+      </view>
+    </view>
+  </view>
+
+  <view class="desc-wrapper ">
+    <text class="desc card-size__with">为了更好的卡片展示效果，可在裁切好图片之后再添加。</text>
+    <!-- <text class="desc card-size__with">只要删除本小程序，则所有卡片数据一并删除。</text> -->
+  </view>
+
+  <button bindtap="onTapSave" class="c-btn save-btn">{{saveButton}}</button>
+</view>

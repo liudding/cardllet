@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "gmenu": "/components/gooeyMenu/gooeyMenu",
+    "favorite": "/components/addtoFavorite/addFavorite"
+  },
+  "navigationBarTitleText": "卡包"
+}

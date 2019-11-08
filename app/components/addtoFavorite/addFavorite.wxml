@@ -1,0 +1,5 @@
+<view class="container">
+  <view class="bubble top-left">
+    <text class="txt">添加到我的小程序</text>
+  </view>
+</view>

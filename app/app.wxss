@@ -1,0 +1,112 @@
+/**app.wxss**/
+
+.fab {
+  position: fixed;
+  bottom: 32px;
+  right: 30px;
+  z-index: 10;
+}
+
+.fab.left {
+  bottom: 32px;
+  left: 30px;
+}
+
+.card-size__with {
+  width: 640rpx; 
+  max-width: 320px;
+}
+
+.card-size {
+  width: 640rpx; 
+  height: 404rpx;
+  max-width: 320px;
+  max-height: 202px;
+}
+
+.card {
+  /* 1: 1.58   85.6mm * 54mm */
+  width: 640rpx; 
+  height: 404rpx;
+  max-width: 320px;
+  max-height: 202px;
+
+  border-radius: 8px;
+  background: #fafafa;
+  position: relative;
+}
+
+.card .card-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transition: transform .3s;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+
+.card:not(.card--flipped) .card-back {
+  transform: rotateY(180deg);
+}
+.card.card--flipped .card-front {
+  transform: rotateY(180deg);
+}
+
+
+.copy-btn {
+  width: 40px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.copy-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.4;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.cell .label {
+  max-width: 80px; 
+  color: #b2b2b2;
+}
+
+.cell .info {
+  flex: 1;
+  text-align: left;
+  margin-left: 8px;
+}
+
+.cell .accessory {
+  /* width: 40px; */
+}
+
+
+.c-btn {
+  color: #333;
+  background-color: #fff;
+}
+
+.c-btn::after {
+  border: none;
+}
+
+/* .c-btn:active {
+  opacity: 0.5;
+} */

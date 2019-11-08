@@ -1,4 +1,5 @@
 {
+	"miniprogramRoot": "app/",
 	"description": "Project configuration file",
 	"packOptions": {
 		"ignore": [
@@ -33,7 +34,7 @@
 		}
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.7.5",
+	"libVersion": "2.7.3",
 	"appid": "wx6f0c5ff8030a44eb",
 	"projectname": "cardllet",
 	"debugOptions": {
@@ -42,6 +43,8 @@
 	"isGameTourist": false,
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
+	"cloudfunctionRoot": "functions/",
+	"cloudfunctionTemplateRoot": "cloudfunctionTemplate",
 	"condition": {
 		"search": {
 			"current": -1,
